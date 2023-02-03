@@ -1,0 +1,208 @@
+---
+title: "Optimization Module"
+author: "Fernando"
+date: "2023-02-03"
+output:
+  html_document: default
+  pdf_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Solving Linear Programming with R
+
+
+### Library **lpSolve**
+
+**Description:** Lp_solve is freely available (under LGPL 2) software for
+solving linear, integer and mixed integer programs. This
+implementation supplies a ``wrapper'' function in C and some R
+functions that solve general linear/integer problems,
+assignment problems, and transportation problems. 
+
+Version: 5.6.17
+
+[Click here to read more about the documentation](http://cran.nexr.com/web/packages/lpSolve/lpSolve.pdf)
+
+### **5.2. Lesson-Optimisation with Excel's Solver: Part 1/Task 1** 
+
+Let’s consider the following scenario.
+
+A car manufacturer produces two types of cars called Edison and Yamato. Each year the company receives **8 000 blocks of steel** (one block per car). **The first car (Edison) yields a 40 000 USD per unit profit**. The second one, due to unfavorable contracts signed by the company, generates a negative **profit of -10 000 USD per unit**. The company has an order for **1 000 Yamato cars from the government that must be fulfilled**.
+
+Since the profit of Yamato cars is negative, its production cannot be too large. Therefore, it’s assumed that the production of Yamato cars cannot be **larger than 250% of Edison’s production plus 1 000 units**. The factory is also unwilling to produce **more than one Yamato car per three Edison cars**. Given conditions provide optimal production (quantity of each vehicle produced) that maximizes the profit given the constraints.
+
+``
+``
+
+#### **Objective function:** 
+
+The function that it is desired to maximize or minimize
+
+**x** $=$ Edison car
+
+**y** $=$ Yamato car
+
+
+
+$$Max(sales) = 40x - 10y$$
+
+#### **Constraints**
+1. We are contractually obligated to make 1000 to the goverment
+
+$y \geq 1000$ 
+
+2. Yamato cars cannot be larger than 250% of Edison’s production plus 1000 units.
+
+$y \leq 2.5x + 1000$
+
+3. Manufacturer is unwilling to produce more than one Yamato car per three Edison cars.
+
+$y \geq 3x$ 
+
+4. Company has 8000 block of steel.
+
+$x + y \leq 8000$ 
+
+``
+``
+
+
+#### **Convert the slope form equation to standard form (if needed):** 
+
+##### **Requires some algebraic manipulation.** 
+``
+``
+**Begin with slope form:**
+
+$$y = mx + b$$
+
+**End with standard form:**
+
+$$Ax + By = C$$
+
+
+$$
+\begin{pmatrix}
+0 & 1\\
+-5 & 2\\
+3 & -1\\
+1 & 1
+\end{pmatrix}
+\begin{pmatrix}
+x \\ 
+y 
+\end{pmatrix}
+\begin{pmatrix}
+1000 \\ 
+2000\\
+0\\
+8000
+\end{pmatrix}
+$$
+``
+``
+ 
+```{r}
+
+```
+### Load library.
+```{r}
+#If not installed, use the command install.package("lpSolve")
+#install.packages("lpSolve")
+library(lpSolve)
+```
+
+
+### **Objective function as a vector.** 
+
+```{r}
+
+Objective.in<-c(40,-10)
+
+```
+### **Construct the matrix,(Neo)**
+
+$$\begin{pmatrix}
+0 & 1\\
+-5 & 2\\
+3 & -1\\
+1 & 1
+\end{pmatrix}$$
+
+```{r}
+Const.mat<-matrix(c(0,1,-5,2,3,-1,1,1),nrow=4,byrow=TRUE)
+Const.mat
+```
+
+### Create atomic vectors for your RHS of the equation. 
+
+$$
+\begin{pmatrix}
+1000 \\ 
+2000\\
+0\\
+8000
+\end{pmatrix}$$
+
+```{r}
+gov_constraint<-1000
+YamatoLimit_constraint<- 2000
+factWillness_constraint<-0
+material_constraint<-8000
+```
+
+### Create a RHS vector.
+
+```{r}
+# The inputs are the atomic vectors we created above. 
+Const.rhs <-c(gov_constraint, YamatoLimit_constraint, factWillness_constraint, material_constraint)
+
+```
+
+### Create a vector for the _inequalities_ or constraints direction.
+```{r}
+Const.dir<-c(">=","<=",">=","<=")
+
+
+```
+
+### Insert values into the lp function
+
+```{r}
+#The inputs the vectors we created above. 
+OptimumResults<-lp(direction="max",Objective.in, Const.mat,Const.dir, Const.rhs)
+OptimumResults
+```
+
+#### The best solution
+
+```{r}
+OptimumResults$solution
+```
+
+#### **Parameters in the function above: **
+
+**_OptimumResults<-lp(direction="max",Objective.in, Const.mat,Const.dir, Const.rhs)_**
+
+**direction**	
+Character string giving direction of optimization: "min" (default) or "max."
+
+**objective.in**	
+Numeric vector of coefficients of objective function
+
+**const.mat**
+Matrix of numeric constraint coefficients, one row per constraint, one column per variable (unless transpose.constraints = FALSE; see below).
+
+**const.dir**
+Vector of character strings giving the direction of the constraint: each value should be one of "<," "<=," "=," "==," ">," or ">=". (In each pair the two values are identical.)
+
+#### For more info type **?lp**
+
+
+
+
+
+
